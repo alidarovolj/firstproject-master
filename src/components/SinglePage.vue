@@ -13,7 +13,7 @@
         <p @click="pizzaSize = 1" :class="{ 'bg-white rounded-2xl' : pizzaSize === 1 }" class="hover:cursor-pointer p-2">Средняя</p>
         <p @click="pizzaSize = 2" :class="{ 'bg-white rounded-2xl' : pizzaSize === 2 }" class="hover:cursor-pointer p-2">Большая</p>
       </div>
-      <button class="bg-main text-white rounded-xl p-2 w-1/2 block mx-auto mt-5">Добавить в корзину</button>
+      <button @click="sendObj()" class="bg-main text-white rounded-xl p-2 w-1/2 block mx-auto mt-5">Добавить в корзину</button>
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ export default {
   data() {
     return {
       pizzas: [],
+      orders: [],
       pizzaSize: 1,
       curID: this.$route.params.id - 1
     }
@@ -32,6 +33,15 @@ export default {
   async mounted() {
     let res = await axios.get('http://localhost:3001/pizza')
     this.pizzas = res.data;
+    let orders = await axios.get('http://localhost:3001/orders')
+    this.orders = orders.data;
+  },
+  methods: {
+    async sendObj() {
+      let changeID = this.pizzas[this.curID]
+      changeID.id = ''
+      await axios.post('http://localhost:3001/orders', changeID)
+    }
   }
 }
 </script>
