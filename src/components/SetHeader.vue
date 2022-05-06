@@ -14,18 +14,47 @@
         <p>30мин &#183; 4.78</p>
       </div>
     </div>
-    <button v-if="currentUser === null" @click="showModal = 1" class="py-2 px-4 rounded-full bg-gray-200 hover:bg-main hover:text-white">Войти</button>
-    <button v-if="currentUser != null" class="py-2 px-4 rounded-full bg-gray-200 hover:bg-main hover:text-white">{{ currentUser }}</button>
+    <div>
+      <button v-if="currentUser === null" @click="showModalReg = 1" class="py-2 px-4 rounded-full bg-gray-200 hover:bg-main hover:text-white">Зарегистрироваться</button>
+      <button v-if="currentUser === null" @click="showModal = 1" class="py-2 px-4 rounded-full bg-gray-200 hover:bg-main hover:text-white ml-4">Войти</button>
+      <button v-if="currentUser != null" @click="showModal = 1" class="py-2 px-4 rounded-full bg-gray-200 hover:bg-main hover:text-white ml-4">{{ currentUser }}</button>
+    </div>
     <div v-if="showModal === 1" class="fixed bg-black w-full h-full top-0 left-0 bg-opacity-50">
       <div class="relative w-full h-full">
-        <div class="abs p-10 bg-white rounded-2xl w-full lg:w-1/3">
+        <div v-if="currentUser === null" class="abs p-10 bg-white rounded-2xl w-full lg:w-1/3">
           <p class="text-3xl font-medium">Войти</p>
           <div class="mt-4">
             <input v-model="form.login" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите логин" type="text">
-            <p v-if="showError === 1" class="text-red-500">Поле пустое</p>
             <input v-model="form.password" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите пароль" type="text">
             <div class="flex items-center justify-evenly mt-4">
               <button @click="validateUser()" class="py-2 px-4 rounded-lg bg-main text-white">Войти</button>
+              <button @click="showModal = 0" class="py-2 px-4 rounded-lg bg-gray-200">Закрыть</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="currentUser != null" class="abs p-10 bg-white rounded-2xl w-full lg:w-1/3">
+          <p class="text-3xl font-medium">Выйти</p>
+          <p class="mt-4">Вы уверены что хотите выйти, {{ currentUser }}?</p>
+          <div class="mt-4">
+            <div class="flex items-center justify-evenly mt-4">
+              <button @click="showModal = 0" class="py-2 px-4 rounded-lg bg-gray-200">Закрыть</button>
+              <button @click="logout()" class="py-2 px-4 rounded-lg bg-main text-white">Выйти</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showModalReg === 1" class="fixed bg-black w-full h-full top-0 left-0 bg-opacity-50">
+      <div class="relative w-full h-full">
+        <div class="abs p-10 bg-white rounded-2xl w-full lg:w-1/3">
+          <p class="text-3xl font-medium">Зарегистрироваться</p>
+          <div class="mt-4">
+            <input v-model="reg.name" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите имя" type="text">
+            <input v-model="reg.login" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите логин" type="text">
+            <input v-model="reg.phone" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите телефон" type="text">
+            <input v-model="reg.password" class="border-2 w-full p-2 rounded-lg my-2" placeholder="Введите пароль" type="text">
+            <div class="flex items-center justify-evenly mt-4">
+              <button @click="registerUser()" class="py-2 px-4 rounded-lg bg-main text-white">Войти</button>
               <button @click="showModal = 0" class="py-2 px-4 rounded-lg bg-gray-200">Закрыть</button>
             </div>
           </div>
@@ -43,11 +72,18 @@ export default {
   data() {
     return {
       showModal: 0,
+      showModalReg: 0,
       showError: 0,
       users: null,
       currentUser: localStorage.getItem('loggedUser'),
       form: {
         login: null,
+        password: null
+      },
+      reg: {
+        login: null,
+        phone: null,
+        name: null,
         password: null
       }
     }
@@ -61,12 +97,25 @@ export default {
       this.users.forEach(element => {
         if (this.form.login === element.login && this.form.password === element.password) {
           localStorage.setItem('loggedUser', element.login)
-          console.log("Вошли")
+          this.$router.go()
         } else if (this.form.login === '' || this.form.login === null) {
           console.log("Поле логина пустое")
           this.showError = 1
         }
       });
+    },
+    logout() {
+      localStorage.removeItem('loggedUser')
+      this.$router.go()
+    },
+    async registerUser() {
+      await axios.post('http://localhost:3001/users', {
+        login: this.reg.login,
+        phone: this.reg.phone,
+        name: this.reg.name,
+        password: this.reg.password,
+      })
+      this.$router.go()
     }
   }
 }

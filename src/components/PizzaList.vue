@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-wrap justify-between">
-    <div class="w-full lg:w-1/4 p-4 my-3" v-for="obj of pizzas" :key="obj.id">
+    <div @click="$router.push({ name: 'single', params: { id: obj.id } })" class="w-full lg:w-1/4 p-4 my-3" v-for="obj of pizzas" :key="obj.id">
       <img :src="obj.images[1]" alt="">
       <div>
         <p class="text-2xl font-medium">{{ obj.title }}</p>
